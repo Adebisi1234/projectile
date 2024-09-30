@@ -15,6 +15,7 @@ class Ball {
   resolution = 0;
   polygon: { x: number; y: number }[] = [];
   rotate = false;
+  defaultX = 30;
   constructor({
     x,
     y,
@@ -35,7 +36,8 @@ class Ball {
     ctx: CanvasRenderingContext2D | null;
   }) {
     this.x = x;
-    this.y = y;
+    this.defaultX = x;
+    this.y = floor.points[x];
     this.width = width;
     this.height = height;
     this.speed = 0;
@@ -43,14 +45,24 @@ class Ball {
     this.gravity = gravity;
     this.velocity = velocity;
     this.angle = angle;
-    this.coords = getCoordinates({ angle, velocity, gravity });
+    this.coords = getCoordinates({
+      angle,
+      velocity,
+      gravity,
+    });
     this.i = 0;
     this.#addEventListeners(ctx);
   }
 
+  jump({ angle, velocity, gravity }: IVariable) {
+    this.coords = getCoordinates({
+      angle: Math.atan(this.x),
+      velocity,
+      gravity,
+    });
+  }
+
   draw(ctx: CanvasRenderingContext2D) {
-    // ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-    // ctx.rect(this.x, this.y, this.radius, this.radius);
     ctx.fillStyle = "red";
     // ctx.fill();
     ctx.beginPath();
@@ -67,6 +79,11 @@ class Ball {
     if (!ctx) return;
     ctx.canvas.addEventListener("mousedown", () => {
       this.rotate = true;
+      this.coords = getCoordinates({
+        angle: Math.atan(this.x),
+        velocity: this.velocity,
+        gravity: this.gravity,
+      });
     });
     ctx.canvas.addEventListener("mouseup", () => {
       this.rotate = false;
@@ -100,10 +117,17 @@ class Ball {
   }
 
   update(ctx: CanvasRenderingContext2D) {
-    this.x = this.coords[this.i][0];
-    this.y = ctx.canvas.height - this.coords[this.i][1];
+    if (this.rotate) {
+      this.y = Math.min(
+        ctx.canvas.height - this.coords[this.i][1],
+        floor.points[this.x] - this.height / 2
+      );
+    } else {
+      this.x = this.defaultX;
+      this.y = floor.points[this.x] - this.height / 2;
+    }
     this.polygon = this.#createPolygon();
-    // console.log(this.i);
+    floor.update(ctx);
     this.draw(ctx);
     this.i = (this.i + 1) % this.coords.length;
     if (this.rotate) {

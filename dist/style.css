@@ -1,11 +1,29 @@
 #main {
-  background-color: grey;
+  background-color: transparent;
 }
 
 body {
   height: 100svh;
   width: 100svw;
   display: flex;
+  gap: 20px;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+}
+
+img {
+  width: 100svw;
+  height: 100svh;
+}
+
+img {
+  position: fixed;
+  z-index: -10;
+  transition: all ease 250ms;
+  object-fit: fill;
+}
+
+.dark {
+  background-color: rgba(0, 0, 0, 0.423);
 }
